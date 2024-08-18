@@ -1,0 +1,50 @@
+local Players = game:GetService("Players"):GetChildren()
+local RunService = game:GetService("RunService")
+local highlight = Instance.new("Highlight")
+highlight.Name = "Highlight"
+
+-- Toggle highlight on/off
+local highlightEnabled = true -- Set this to false to disable the highlight
+
+local function applyHighlight(player)
+    if highlightEnabled and player.Character and not player.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight") then
+        local highlightClone = highlight:Clone()
+        highlightClone.Adornee = player.Character
+        highlightClone.Parent = player.Character:FindFirstChild("HumanoidRootPart")
+        highlightClone.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlightClone.Name = "Highlight"
+    end
+end
+
+-- Apply highlight to existing players
+for i, v in pairs(Players) do
+    repeat wait() until v.Character
+    applyHighlight(v)
+end
+
+-- Apply highlight to new players
+game.Players.PlayerAdded:Connect(function(player)
+    repeat wait() until player.Character
+    applyHighlight(player)
+end)
+
+-- Remove highlight when player leaves
+game.Players.PlayerRemoving:Connect(function(playerRemoved)
+    if playerRemoved.Character and playerRemoved.Character:FindFirstChild("HumanoidRootPart") then
+        local highlight = playerRemoved.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("Highlight")
+        if highlight then
+            highlight:Destroy()
+        end
+    end
+end)
+
+-- Continuously check and apply highlight
+RunService.Heartbeat:Connect(function()
+    if highlightEnabled then
+        for i, v in pairs(Players) do
+            repeat wait() until v.Character
+            applyHighlight(v)
+            task.wait()
+        end
+    end
+end)
